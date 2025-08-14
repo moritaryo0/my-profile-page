@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic Mac OS UI with Folders (Responsive)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* * General Body and Desktop Styling */
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #c0c0c0;
+            background-image:
+                linear-gradient(45deg, #808080 25%, transparent 25%),
+                linear-gradient(-45deg, #808080 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #808080 75%),
+                linear-gradient(-45deg, transparent 75%, #808080 75%);
+            background-size: 2px 2px;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden; /* Hide scrollbars on desktop */
+            user-select: none;
+        }
+
+        #desktop {
+            padding-top: 24px; /* Space for menu bar */
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        /* * Top Menu Bar */
+        #menu-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 24px;
+            background-color: #d4d4d4;
+            border-bottom: 2px solid #000;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        #menu-bar .menu-item {
+            padding: 2px 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        #menu-bar .menu-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+        
+        .apple-logo {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+        }
+
+        /* * Window Styling (Desktop) */
+        .window {
+            position: absolute;
+            width: 500px;
+            min-height: 250px;
+            background-color: #d4d4d4;
+            border: 2px solid #000;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-bar {
+            height: 22px;
+            background-color: #d4d4d4;
+            border-bottom: 2px solid #000;
+            padding: 0 5px;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background-image: repeating-linear-gradient(to bottom, #d4d4d4, #d4d4d4 4px, #b0b0b0 4px, #b0b0b0 5px);
+        }
+
+        .title-bar-text {
+            font-size: 18px;
+            margin: 0 auto;
+            padding-left: 20px; /* Space for close box */
+        }
+        
+        .close-box {
+            position: absolute;
+            top: 3px;
+            left: 5px;
+            width: 14px;
+            height: 14px;
+            border: 1px solid #000;
+            cursor: pointer;
+        }
+        .close-box:hover {
+            background-color: #000;
+        }
+
+        .window-content {
+            padding: 15px;
+            flex-grow: 1;
+            font-size: 20px;
+            line-height: 1.6;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+        
+        .window-content h2 {
+            font-size: 24px;
+            margin-top: 0;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .window-content a {
+            color: #0000FF;
+            text-decoration: underline;
+        }
+        
+        /* * Icon Styling */
+        .icon {
+            width: 80px;
+            height: 90px;
+            margin: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            font-size: 16px;
+        }
+        .icon.openable {
+            cursor: pointer;
+        }
+        .icon-visual {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 5px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .icon-folder {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M4 12 H24 V10 C24 8 26 6 28 6 H36 C38 6 40 8 40 10 V12 H60 V50 H4z' fill='%23d4d4d4' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+        }
+        .icon-note {
+             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M12 8 H44 L52 16 V56 H12z' fill='%23d4d4d4' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M44 8 V16 H52' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M18 28h28M18 36h28M18 44h18' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        /* * Responsive Styles for Mobile */
+        @media (max-width: 768px) {
+            body {
+                overflow: auto; /* Allow scrolling on mobile */
+            }
+
+            #desktop {
+                height: auto;
+            }
+
+            .window {
+                position: relative !important; /* Override inline absolute positioning */
+                width: 95% !important;
+                left: auto !important;
+                top: auto !important;
+                margin: 20px auto !important;
+                box-shadow: none !important;
+                min-height: 0 !important;
+            }
+
+            .title-bar {
+                cursor: default; /* No dragging on mobile */
+            }
+
+            .window-content {
+                font-size: 18px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Menu Bar -->
+    <div id="menu-bar">
+        <div class="menu-item">
+            <svg class="apple-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.33,16.54a5.3,5.3,0,0,1-2.35,4.32,4.23,4.23,0,0,1-3.22.86,4.52,4.52,0,0,1-2.83-1.44,4.38,4.38,0,0,1-1.5-3.11,10.29,10.29,0,0,1,2.15-6.42,4.53,4.53,0,0,1,3.85-2,4.3,4.3,0,0,1,2.6,1,10,10,0,0,0-2.55,3.74,4.88,4.88,0,0,0,1.6,3.15A4.18,4.18,0,0,0,19.33,16.54Zm-3.2-12.29a4.8,4.8,0,0,1,2.1-1.3,4.29,4.29,0,0,1-2.3,3.75,4.5,4.5,0,0,1-2.1,0A4.66,4.66,0,0,1,16.13,4.25Z"/></svg>
+        </div>
+        <div class="menu-item active" data-target="profile-window">Profile</div>
+        <div class="menu-item" data-target="contact-window">Contact</div>
+        <div class="menu-item" data-target="blog-window">Blog</div>
+        <div class="menu-item" data-target="sns-window">SNS</div>
+        <div class="menu-item" data-target="content-window">Content</div>
+    </div>
+
+    <!-- Desktop area containing all windows -->
+    <div id="desktop">
+
+        <!-- Main Windows -->
+        <div class="window" id="profile-window" style="top: 50px; left: 80px;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Profile</div></div>
+            <div class="window-content" style="display: block;"><h2>About Me</h2><p>Hello! Welcome to my personal page.<br>I am a web developer with a passion for retro computing and minimalist design. This page is a tribute to the classic Mac OS.</p></div>
+        </div>
+
+        <div class="window hidden" id="contact-window" style="top: 70px; left: 120px;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Contact</div></div>
+            <div class="window-content" style="display: block;"><h2>Get In Touch</h2><p>You can reach me via email:<br><a href="#">retro.dev@example.com</a></p></div>
+        </div>
+        
+        <div class="window hidden" id="blog-window" style="top: 90px; left: 160px;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Blog</div></div>
+            <div class="window-content" style="display: block;"><h2>Latest Posts</h2><p>- Why System 7 was a masterpiece<br>- Building modern apps with retro style<br>- The beauty of pixel fonts</p></div>
+        </div>
+
+        <div class="window hidden" id="sns-window" style="top: 110px; left: 200px;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">SNS</div></div>
+            <div class="window-content" style="display: block;"><h2>Follow Me</h2><p>X (Twitter): <a href="#">@retro_dev</a><br>GitHub: <a href="#">github.com/retrodev</a></p></div>
+        </div>
+        
+        <!-- Content Window with openable folders -->
+        <div class="window hidden" id="content-window" style="top: 130px; left: 240px;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Content</div></div>
+            <div class="window-content">
+                <div class="icon openable" data-opens="projects-folder-content">
+                    <div class="icon-visual icon-folder"></div>
+                    <div class="icon-label">Projects</div>
+                </div>
+                <div class="icon openable" data-opens="images-folder-content">
+                    <div class="icon-visual icon-folder"></div>
+                    <div class="icon-label">Images</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Windows that open from folders -->
+        <div class="window hidden" id="projects-folder-content" style="top: 200px; left: 350px; width: 400px;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Projects</div></div>
+            <div class="window-content">
+                 <div class="icon">
+                    <div class="icon-visual icon-note"></div>
+                    <div class="icon-label">retro-os.js</div>
+                </div>
+                 <div class="icon">
+                    <div class="icon-visual icon-note"></div>
+                    <div class="icon-label">pixel-art.ai</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="window hidden" id="images-folder-content" style="top: 220px; left: 400px; width: 400px;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Images</div></div>
+            <div class="window-content">
+                 <div class="icon">
+                    <div class="icon-visual icon-note"></div>
+                    <div class="icon-label">logo.png</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Global variable for z-index management ---
+        let maxZ = 10;
+        let isDesktop = window.innerWidth > 768;
+
+        /**
+         * Makes all elements with the class 'window' draggable by their 'title-bar'.
+         * Also handles bringing windows to the front when clicked.
+         */
+        function makeWindowsDraggable() {
+            const windows = document.querySelectorAll('.window');
+            windows.forEach(win => {
+                const titleBar = win.querySelector('.title-bar');
+                win.addEventListener('mousedown', () => {
+                    maxZ++;
+                    win.style.zIndex = maxZ;
+                }, true);
+                if (titleBar && isDesktop) dragElement(win, titleBar); // Only enable drag on desktop
+            });
+        }
+        
+        function dragElement(elmnt, header) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            header.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                if (e.target.classList.contains('close-box')) return; // Don't drag if close box is clicked
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        /**
+         * Sets up the tab-switching functionality for the main menu.
+         */
+        function setupMenuTabs() {
+            const menuItems = document.querySelectorAll('#menu-bar .menu-item[data-target]');
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.dataset.target;
+                    const targetWindow = document.getElementById(targetId);
+                    if (!targetWindow) return;
+
+                    // On mobile, hide all main windows before showing the new one
+                    if (!isDesktop) {
+                         menuItems.forEach(i => {
+                            const win = document.getElementById(i.dataset.target);
+                            if(win) win.classList.add('hidden');
+                         });
+                    }
+
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    targetWindow.classList.remove('hidden');
+                    maxZ++;
+                    targetWindow.style.zIndex = maxZ;
+                });
+            });
+        }
+
+        /**
+         * Sets up the double-click functionality for opening folders.
+         */
+        function setupFolderOpening() {
+            const openableIcons = document.querySelectorAll('.icon.openable');
+            openableIcons.forEach(icon => {
+                icon.addEventListener('dblclick', () => {
+                    const targetId = icon.dataset.opens;
+                    const targetWindow = document.getElementById(targetId);
+                    if (targetWindow) {
+                        targetWindow.classList.remove('hidden');
+                        maxZ++;
+                        targetWindow.style.zIndex = maxZ;
+                    }
+                });
+            });
+        }
+
+        /**
+         * Sets up the close button functionality for all windows.
+         */
+        function setupCloseButtons() {
+            const closeBoxes = document.querySelectorAll('.close-box');
+            closeBoxes.forEach(box => {
+                box.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent drag from starting
+                    const windowToClose = box.closest('.window');
+                    if (windowToClose) {
+                        windowToClose.classList.add('hidden');
+
+                        // If it's a main tab window, deactivate the menu item
+                        const menuTarget = document.querySelector(`.menu-item[data-target="${windowToClose.id}"]`);
+                        if(menuTarget) {
+                            menuTarget.classList.remove('active');
+                        }
+                    }
+                });
+            });
+        }
+
+        // --- Initialize all functionality on page load ---
+        window.onload = function() {
+            makeWindowsDraggable();
+            setupMenuTabs();
+            setupFolderOpening();
+            setupCloseButtons();
+        };
+
+        // Optional: Handle window resize to switch between desktop/mobile logic
+        window.addEventListener('resize', () => {
+            const wasDesktop = isDesktop;
+            isDesktop = window.innerWidth > 768;
+            // If the state changed, we might want to reload or re-initialize logic
+            if(wasDesktop !== isDesktop) {
+                // For simplicity, a reload is the easiest way to reset state
+                // location.reload(); 
+            }
+        });
+    </script>
+
+</body>
+</html>
