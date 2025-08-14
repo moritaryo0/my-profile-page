@@ -32,7 +32,7 @@
             width: 100%;
             position: relative;
         }
-
+        
         /* * Top Menu Bar */
         #menu-bar {
             position: fixed;
@@ -59,11 +59,21 @@
             background-color: #000;
             color: #fff;
         }
-        
-        .apple-logo {
-            width: 16px;
-            height: 16px;
-            margin-right: 10px;
+
+        /* * Completion Message Styling */
+        #completion-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #000;
+            background-color: #d4d4d4;
+            padding: 20px 40px;
+            border: 2px solid #000;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.7);
+            text-align: center;
+            z-index: 2000; /* Make sure it's on top of everything */
         }
 
         /* * Window Styling (Desktop) */
@@ -76,6 +86,16 @@
             box-shadow: 5px 5px 0px rgba(0,0,0,0.7);
             display: flex;
             flex-direction: column;
+            /* Styles for loading animation: Initially clipped and invisible */
+            opacity: 0;
+            clip-path: inset(0 0 100% 0);
+            transition: opacity 0.2s ease-out, clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* This class is added by JS to trigger the animation */
+        .window.loaded {
+            opacity: 1;
+            clip-path: inset(0 0 0 0); /* Reveal the window */
         }
 
         .title-bar {
@@ -142,8 +162,6 @@
             align-items: center;
             justify-content: flex-start;
             font-size: 16px;
-        }
-        .icon.openable {
             cursor: pointer;
         }
         .icon-visual {
@@ -156,9 +174,6 @@
         }
         .icon-folder {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M4 12 H24 V10 C24 8 26 6 28 6 H36 C38 6 40 8 40 10 V12 H60 V50 H4z' fill='%23d4d4d4' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
-        }
-        .icon-note {
-             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M12 8 H44 L52 16 V56 H12z' fill='%23d4d4d4' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M44 8 V16 H52' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M18 28h28M18 36h28M18 44h18' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
         }
         
         .hidden {
@@ -173,14 +188,23 @@
 
             #desktop {
                 height: auto;
+                padding-top: 44px; /* Extra space for menu bar */
+                /* --- MODIFIED: Reverse window order on mobile --- */
+                display: flex;
+                flex-direction: column-reverse;
+            }
+            
+            #menu-bar {
+                height: auto;
+                flex-wrap: wrap;
             }
 
             .window {
                 position: relative !important; /* Override inline absolute positioning */
                 width: 95% !important;
-                left: auto !important;
-                top: auto !important;
-                margin: 20px auto !important;
+                left: 0 !important;
+                top: 0 !important;
+                margin: 0 auto 20px auto !important;
                 box-shadow: none !important;
                 min-height: 0 !important;
             }
@@ -197,39 +221,44 @@
     </style>
 </head>
 <body>
-
     <!-- Top Menu Bar -->
     <div id="menu-bar">
-        <div class="menu-item">
-            <svg class="apple-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.33,16.54a5.3,5.3,0,0,1-2.35,4.32,4.23,4.23,0,0,1-3.22.86,4.52,4.52,0,0,1-2.83-1.44,4.38,4.38,0,0,1-1.5-3.11,10.29,10.29,0,0,1,2.15-6.42,4.53,4.53,0,0,1,3.85-2,4.3,4.3,0,0,1,2.6,1,10,10,0,0,0-2.55,3.74,4.88,4.88,0,0,0,1.6,3.15A4.18,4.18,0,0,0,19.33,16.54Zm-3.2-12.29a4.8,4.8,0,0,1,2.1-1.3,4.29,4.29,0,0,1-2.3,3.75,4.5,4.5,0,0,1-2.1,0A4.66,4.66,0,0,1,16.13,4.25Z"/></svg>
-        </div>
         <div class="menu-item active" data-target="profile-window">Profile</div>
-        <div class="menu-item" data-target="contact-window">Contact</div>
-        <div class="menu-item" data-target="blog-window">Blog</div>
         <div class="menu-item" data-target="sns-window">SNS</div>
         <div class="menu-item" data-target="content-window">Content</div>
+        <div class="menu-item" data-target="contact-window">Contact</div>
+        <div class="menu-item" data-target="blog-window">Blog</div>
     </div>
+
 
     <!-- Desktop area containing all windows -->
     <div id="desktop">
 
-        <!-- Main Windows -->
-        <div class="window" id="profile-window" style="top: 50px; left: 80px;">
-            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">自己紹介</div></div>
-            <div class="window-content" style="display: block;"><h2>青木九蘭(ｷｭｰ蘭)</h2><p><br>アプリ制作、文字書き、絵、音楽、自作キーボード、なんでもかんでも手を出します。<br>ただ、ありのままに</p></div>
-        </div>
-
-        <div class="window hidden" id="contact-window" style="top: 70px; left: 120px;">
-            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Contact</div></div>
-            <div class="window-content" style="display: block;"><h2>漏れのメアド(仕事用)</h2><p>下からご連絡ください。<br><a href="https://mail.google.com/mail/">aokikyuran@gmail.com</a></p></div>
-        </div>
-        
-        <div class="window hidden" id="blog-window" style="top: 90px; left: 160px;">
+        <!-- Windows are now ordered by z-index -->
+        <div class="window" id="blog-window" style="top: 150px; left: 300px; z-index: 1;">
             <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Blog</div></div>
             <div class="window-content" style="display: block;"><h2>気が向いたら最近あったこととか書こうと思います。</h2><p>- 今の所特になし<br>- Building modern apps with retro style<br>- The beauty of pixel fonts</p></div>
         </div>
 
-        <div class="window hidden" id="sns-window" style="top: 110px; left: 200px;">
+        <div class="window" id="contact-window" style="top: 120px; left: 250px; z-index: 2;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Contact</div></div>
+            <div class="window-content" style="display: block;"><h2>漏れのメアド(仕事用)</h2><p>下からご連絡ください。<br><a href="https://mail.google.com/mail/">aokikyuran@gmail.com</a></p></div>
+        </div>
+        
+        <div class="window" id="content-window" style="top: 90px; left: 200px; z-index: 3;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Content</div></div>
+            <div class="window-content">
+                <!-- Modified Content: Link to external site -->
+                <a href="https://aozora-select-production.up.railway.app/" target="_blank" style="text-decoration: none; color: inherit;">
+                    <div class="icon">
+                        <div class="icon-visual icon-folder"></div>
+                        <div class="icon-label">青空文庫AI推薦</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="window" id="sns-window" style="top: 60px; left: 150px; z-index: 4;">
             <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">SNS</div></div>
             <div class="window-content" style="display: block;">
                 <h2>SNS垢一覧</h2>
@@ -241,44 +270,14 @@
             </div>
         </div>
         
-        <!-- Content Window with openable folders -->
-        <div class="window hidden" id="content-window" style="top: 130px; left: 240px;">
-            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Content</div></div>
-            <div class="window-content">
-                <div class="icon openable" data-opens="projects-folder-content">
-                    <div class="icon-visual icon-folder"></div>
-                    <div class="icon-label">青空文庫AIビュアー</div>
-                </div>
-                <div class="icon openable" data-opens="images-folder-content">
-                    <div class="icon-visual icon-folder"></div>
-                    <div class="icon-label">Images</div>
-                </div>
-            </div>
+        <div class="window" id="profile-window" style="top: 30px; left: 100px; z-index: 5;">
+            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">自己紹介</div></div>
+            <div class="window-content" style="display: block;"><h2>青木九蘭(ｷｭｰ蘭)</h2><p><br>アプリ制作、文字書き、絵、音楽、自作キーボード、なんでもかんでも手を出します。<br>ただ、ありのままに</p></div>
         </div>
         
-        <!-- Windows that open from folders -->
-        <div class="window hidden" id="projects-folder-content" style="top: 200px; left: 350px; width: 400px;">
-            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">青空文庫AIビュアー</div></div>
-            <div class="window-content">
-                 <div class="icon">
-                    <div class="icon-visual icon-note"></div>
-                    <div class="icon-label">retro-os.js</div>
-                </div>
-                 <div class="icon">
-                    <div class="icon-visual icon-note"></div>
-                    <div class="icon-label">pixel-art.ai</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="window hidden" id="images-folder-content" style="top: 220px; left: 400px; width: 400px;">
-            <div class="title-bar"><div class="close-box"></div><div class="title-bar-text">Images</div></div>
-            <div class="window-content">
-                 <div class="icon">
-                    <div class="icon-visual icon-note"></div>
-                    <div class="icon-label">logo.png</div>
-                </div>
-            </div>
+        <!-- Completion Message (hidden by default) -->
+        <div id="completion-message" class="hidden">
+            Thank You!
         </div>
 
     </div>
@@ -296,11 +295,15 @@
             const windows = document.querySelectorAll('.window');
             windows.forEach(win => {
                 const titleBar = win.querySelector('.title-bar');
+                // Bring window to the front on mousedown
                 win.addEventListener('mousedown', () => {
                     maxZ++;
                     win.style.zIndex = maxZ;
                 }, true);
-                if (titleBar && isDesktop) dragElement(win, titleBar); // Only enable drag on desktop
+                // Enable dragging only on desktop
+                if (titleBar && isDesktop) {
+                    dragElement(win, titleBar);
+                }
             });
         }
         
@@ -309,7 +312,7 @@
             header.onmousedown = dragMouseDown;
 
             function dragMouseDown(e) {
-                if (e.target.classList.contains('close-box')) return; // Don't drag if close box is clicked
+                if (e.target.classList.contains('close-box')) return;
                 e = e || window.event;
                 e.preventDefault();
                 pos3 = e.clientX;
@@ -334,7 +337,7 @@
                 document.onmousemove = null;
             }
         }
-
+        
         /**
          * Sets up the tab-switching functionality for the main menu.
          */
@@ -346,80 +349,92 @@
                     const targetWindow = document.getElementById(targetId);
                     if (!targetWindow) return;
 
-                    // On mobile, hide all main windows before showing the new one
-                    if (!isDesktop) {
-                         menuItems.forEach(i => {
-                            const win = document.getElementById(i.dataset.target);
-                            if(win) win.classList.add('hidden');
-                         });
-                    }
-
-                    menuItems.forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-                    
-                    targetWindow.classList.remove('hidden');
+                    // Bring the target window to the front
                     maxZ++;
                     targetWindow.style.zIndex = maxZ;
+
+                    // Update active state on menu items
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
                 });
             });
         }
 
         /**
-         * Sets up the double-click functionality for opening folders.
-         */
-        function setupFolderOpening() {
-            const openableIcons = document.querySelectorAll('.icon.openable');
-            openableIcons.forEach(icon => {
-                icon.addEventListener('dblclick', () => {
-                    const targetId = icon.dataset.opens;
-                    const targetWindow = document.getElementById(targetId);
-                    if (targetWindow) {
-                        targetWindow.classList.remove('hidden');
-                        maxZ++;
-                        targetWindow.style.zIndex = maxZ;
-                    }
-                });
-            });
-        }
-
-        /**
-         * Sets up the close button functionality for all windows.
+         * Sets up the close button functionality and checks for completion.
          */
         function setupCloseButtons() {
             const closeBoxes = document.querySelectorAll('.close-box');
             closeBoxes.forEach(box => {
                 box.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent drag from starting
+                    e.stopPropagation();
                     const windowToClose = box.closest('.window');
                     if (windowToClose) {
                         windowToClose.classList.add('hidden');
-
-                        // If it's a main tab window, deactivate the menu item
+                        
+                        // Deactivate corresponding menu item
                         const menuTarget = document.querySelector(`.menu-item[data-target="${windowToClose.id}"]`);
                         if(menuTarget) {
                             menuTarget.classList.remove('active');
                         }
+
+                        checkAllWindowsClosed();
                     }
                 });
             });
         }
 
+        /**
+         * Checks if all main windows are closed and shows a completion message.
+         */
+        function checkAllWindowsClosed() {
+            const mainWindows = document.querySelectorAll('#profile-window, #sns-window, #content-window, #contact-window, #blog-window');
+            const allClosed = Array.from(mainWindows).every(win => win.classList.contains('hidden'));
+
+            if (allClosed) {
+                const message = document.getElementById('completion-message');
+                message.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Initiates the loading sequence for windows on page load.
+         */
+        function startLoadingSequence() {
+            const windowsToLoad = Array.from(document.querySelectorAll('#profile-window, #sns-window, #content-window, #contact-window, #blog-window'));
+
+            // Sort windows by z-index in ascending order (lowest first)
+            windowsToLoad.sort((a, b) => {
+                const zIndexA = parseInt(window.getComputedStyle(a).zIndex, 10) || 0;
+                const zIndexB = parseInt(window.getComputedStyle(b).zIndex, 10) || 0;
+                return zIndexA - zIndexB;
+            });
+
+            // Reveal windows one by one
+            windowsToLoad.forEach((win, index) => {
+                setTimeout(() => {
+                    win.classList.add('loaded');
+                }, index * 200); // 200ms delay between each window
+            });
+
+            // After the animation, initialize the interactive features
+            const totalAnimationTime = windowsToLoad.length * 200;
+            setTimeout(() => {
+                makeWindowsDraggable();
+                setupMenuTabs();
+                setupCloseButtons();
+            }, totalAnimationTime);
+        }
+
         // --- Initialize all functionality on page load ---
-        window.onload = function() {
-            makeWindowsDraggable();
-            setupMenuTabs();
-            setupFolderOpening();
-            setupCloseButtons();
-        };
+        window.onload = startLoadingSequence;
 
         // Optional: Handle window resize to switch between desktop/mobile logic
         window.addEventListener('resize', () => {
             const wasDesktop = isDesktop;
             isDesktop = window.innerWidth > 768;
-            // If the state changed, we might want to reload or re-initialize logic
-            if(wasDesktop !== isDesktop) {
-                // For simplicity, a reload is the easiest way to reset state
-                // location.reload(); 
+            if (wasDesktop !== isDesktop) {
+                location.reload(); 
             }
         });
     </script>
